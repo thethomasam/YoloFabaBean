@@ -1,0 +1,23 @@
+schema: '2.0'
+stages:
+  prepare:
+    cmd: python src/prepare.py PlantDetection
+    deps:
+    - path: ./PlantDetection
+      hash: md5
+      md5: 9204afc7022bc62c8e882e12627a46d4.dir
+      size: 106917793
+      nfiles: 730
+    - path: src/prepare.py
+      hash: md5
+      md5: 44fa49de08bba4787f31812b3bbed0c5
+      size: 1910
+    params:
+      params.yaml:
+        prepare.split: 640
+    outs:
+    - path: data/prepared
+      hash: md5
+      md5: 0769d4e257bebef320ab88c75d40fce6.dir
+      size: 18642909
+      nfiles: 78

@@ -1,0 +1,10 @@
+stages:
+  prepare:
+    cmd: python src/prepare.py PlantDetection
+    deps:
+    - ./PlantDetection
+    - src/prepare.py
+    params:
+    - prepare.split
+    outs:
+    - data/prepared
