@@ -21,3 +21,25 @@ stages:
       md5: 0769d4e257bebef320ab88c75d40fce6.dir
       size: 18642909
       nfiles: 78
+  featurize:
+    cmd: python src/featurization.py data/prepared BestModel/best.pt
+    deps:
+    - path: data/prepared
+      hash: md5
+      md5: 0769d4e257bebef320ab88c75d40fce6.dir
+      size: 18642909
+      nfiles: 78
+    - path: src/featurization.py
+      hash: md5
+      md5: 4ffbccef7158dfd5eb1d4324c890812c
+      size: 5625
+    params:
+      params.yaml:
+        featurize.ngrams: 1
+        featurize.threshold_area: 10
+    outs:
+    - path: data/predictions
+      hash: md5
+      md5: 5804b086c6221c20ac23ab0b7010901e.dir
+      size: 19040271
+      nfiles: 78

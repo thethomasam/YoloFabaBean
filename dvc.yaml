@@ -8,3 +8,13 @@ stages:
     - prepare.split
     outs:
     - data/prepared
+  featurize:
+    cmd: python src/featurization.py data/prepared BestModel/best.pt
+    deps:
+    - data/prepared
+    - src/featurization.py
+    params:
+    - featurize.threshold_area
+    - featurize.ngrams
+    outs:
+    - data/predictions

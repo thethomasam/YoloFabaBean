@@ -4,7 +4,7 @@ prepare:
  
 
 featurize:
-  max_features: 100
+  threshold_area: 10
   ngrams: 1
 
 train:
