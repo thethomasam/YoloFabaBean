@@ -53,7 +53,7 @@ def main():
             for x,y,w,h in result.boxes.xywh:
                 x,y,w,h = int(x), int(y), int(w), int(h)
                 cv2.rectangle(without_faba,  (x - w//2, y - h//2),(x+w//2, y+w//2), 255, -1)
-                cv2.rectangle(image,  (x - w//2, y - h//2),(x+w//2, y+w//2), (0,255,0), 3)
+                cv2.rectangle(image,  (x - w//2, y - h//2),(x+w//2, y+w//2), 0, -3)
         hsv_image = cv2.cvtColor(without_faba, cv2.COLOR_BGR2HSV)
         lower_green = np.array([35, 50, 50])  # Lower bound for green in HSV
         upper_green = np.array([85, 255, 255])  # Upper bound for green in HSV
@@ -66,7 +66,8 @@ def main():
                 area=cv2.contourArea(contour)
                     #cv2.putText(image, hsv_text, (x, y - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
                 if area>threshold_area:
-                    cv2.circle(image, (x, y), 20, (255, 0, 0), 2)
+                     pass
+                    #cv2.circle(image, (x, y), 20, (255, 0, 0), 2)
         print(os.path.join(output_path,str(file)+'.jpg'))
         cv2.imwrite(os.path.join(output_path,str(file)+'.jpg'),image)
         

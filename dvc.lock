@@ -31,8 +31,8 @@ stages:
       nfiles: 78
     - path: src/featurization.py
       hash: md5
-      md5: 4ffbccef7158dfd5eb1d4324c890812c
-      size: 5625
+      md5: 2f6d0f0579a6578427ba2ed20469e73d
+      size: 2939
     params:
       params.yaml:
         featurize.ngrams: 1
@@ -40,6 +40,6 @@ stages:
     outs:
     - path: data/predictions
       hash: md5
-      md5: 5804b086c6221c20ac23ab0b7010901e.dir
-      size: 19040271
+      md5: 7f6fa39d359129ff1827d67f4cc96e4b.dir
+      size: 18510689
       nfiles: 78
