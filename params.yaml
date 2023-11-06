@@ -1,6 +1,7 @@
 prepare:
-  split: 0.20
-  seed: 20170428
+  split: 640
+  step: 50
+ 
 
 featurize:
   max_features: 100

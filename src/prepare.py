@@ -3,42 +3,39 @@ import random
 import re
 import sys
 import xml.etree.ElementTree
-
+import cv2
 import yaml
+import shutil
 
 
-def process_posts(input_lines, fd_out_train, fd_out_test, target_tag, split):
-    """
-    Process the input lines and write the output to the output files.
 
-    Args:
-        input_lines (list): List of input lines.
-        fd_out_train (file): Output file for the training data set.
-        fd_out_test (file): Output file for the test data set.
-        target_tag (str): Target tag.
-        split (float): Test data set split ratio.
-    """
-    num = 1
-    for line in input_lines:
-        try:
-            fd_out = fd_out_train if random.random() > split else fd_out_test
-            attr = xml.etree.ElementTree.fromstring(line).attrib
 
-            pid = attr.get("Id", "")
-            label = 1 if target_tag in attr.get("Tags", "") else 0
-            title = re.sub(r"\s+", " ", attr.get("Title", "")).strip()
-            body = re.sub(r"\s+", " ", attr.get("Body", "")).strip()
-            text = title + " " + body
+def extract_small_images(input_image_path, output_folder_path, window_size, step):
+    input_image = cv2.imread(input_image_path)
+    height, width, _ = input_image.shape
+    print(height,width)
 
-            fd_out.write("{}\t{}\t{}\n".format(pid, label, text))
+    for y in range(0, height - window_size[1] + 1, window_size[1]): # Adjusted step size to window_size[1]
+        for x in range(0, width - window_size[0] + 1, window_size[0]): # Adjusted step size to window_size[0]
+   
+            # Define the coordinates for the window
+            left = x
+            top = y
+            right = x + window_size[0]
+            bottom = y + window_size[1]
 
-            num += 1
-        except Exception as ex:
-            sys.stderr.write(f"Skipping the broken line {num}: {ex}\n")
+            # Crop the image to the window
+            window = input_image[top:bottom, left:right]
 
+            # Save the cropped window
+            cv2.imwrite(f'{output_folder_path}/window_{x}_{y}.jpg', window)
+
+    
 
 def main():
+    input_image_path = "15-6-1-orig.jpg"
     params = yaml.safe_load(open("params.yaml"))["prepare"]
+    
 
     if len(sys.argv) != 2:
         sys.stderr.write("Arguments error. Usage:\n")
@@ -47,31 +44,22 @@ def main():
 
     # Test data set split ratio
     split = params["split"]
-    random.seed(params["seed"])
+    step= params["step"]
+    window_size=(split,split)
 
-    input = sys.argv[1]
-    output_train = os.path.join("data", "prepared", "train.tsv")
-    output_test = os.path.join("data", "prepared", "test.tsv")
-
-    os.makedirs(os.path.join("data", "prepared"), exist_ok=True)
-
-    input_lines = []
-    with open(input) as fd_in:
-        input_lines = fd_in.readlines()
-
-    fd_out_train = open(output_train, "w", encoding="utf-8")
-    fd_out_test = open(output_test, "w", encoding="utf-8")
-
-    process_posts(
-        input_lines=input_lines,
-        fd_out_train=fd_out_train,
-        fd_out_test=fd_out_test,
-        target_tag="<r>",
-        split=split,
-    )
-
-    fd_out_train.close()
-    fd_out_test.close()
+    
+    output_path=os.path.join("data", "prepared")
+    if os.path.isdir(output_path) and os.listdir(output_path) :
+        print('No Files')
+        files = os.listdir(output_path)
+        if files:
+            print(f"Files found in '{output_path}'. Removing them...")
+        [os.remove(os.path.join(output_path, file)) for file in files]
+    
+    else:
+        print(f"The directory '{output_path}' does not exist.")
+        os.makedirs(output_path, exist_ok=True)
+    extract_small_images(input_image_path, output_path, window_size, step)
 
 
 if __name__ == "__main__":
