@@ -11,7 +11,57 @@ from sklearn.feature_extraction.text import CountVectorizer, TfidfTransformer
 from ultralytics import YOLO
 from ultralytics.utils.plotting import Annotator
 
+def get_predictions(
+    analysis_data: str,
+    yolo_model: YOLO,  # Assuming YoloV4 is a class for your YOLO model
+    threshold_area: float,
+    output_path: str,
+    save_dir: str
+):
+    """
+    Generate predictions using a YOLO model and visualize the results on images.
 
+    Parameters:
+    - analysis_data (str): Path to the directory containing input images for analysis.
+    - yolo_model (YoloV4): YOLO model instance for object detection.
+    - threshold_area (float): Area threshold for considering detected objects.
+    - output_path (str): Path to the directory where the visualized images will be saved.
+    - save_dir (str): Directory to save intermediate results during YOLO predictions.
+
+    Returns:
+    - None
+
+    This function performs object detection using the YOLO model on images from 'analysis_data'.
+    Detected objects are visualized on the input images, and the visualized images are saved in
+    the 'output_path' directory. The 'threshold_area' parameter filters out small objects based
+    on their contour area.
+
+    Example:
+    >>> analysis_data = 'path/to/analysis/images'
+    >>> yolo_model = YoloV4()  # Assuming YOLO model is initialized
+    >>> threshold_area = 1000.0
+    >>> output_path = 'path/to/output/images'
+    >>> save_dir = 'path/to/save/intermediate/results'
+    >>> get_predictions(analysis_data, yolo_model, threshold_area, output_path, save_dir)
+    """
+    # read files from directory
+    for file in os.listdir(analysis_data):
+        file_path=os.path.join(analysis_data,file)
+        image=cv2.imread(file_path)
+        # get predictions for each image
+        results = yolo_model.predict(file_path,rect=True,save=True,save_dir=save_dir,conf=0.1)
+        
+        #iterate through bounding boxes
+        for result in results:
+            for x,y,w,h in result.boxes.xywh:
+                x,y,w,h = int(x), int(y), int(w), int(h)
+                #draw filled rectangles to hide faba beans
+                cv2.rectangle(image,  (x - w//2, y - h//2),(x+w//2, y+w//2), 0, -3)
+
+        print(os.path.join(output_path,str(file)+'.jpg'))
+        cv2.imwrite(os.path.join(output_path,str(file)+'.jpg'),image)
+        
+     
 
 
 def main():
@@ -28,6 +78,7 @@ def main():
     analysis_data = sys.argv[1]
     best_model = sys.argv[2]
     yolov8_detector = YOLO(best_model)
+    
     current_directory = os.getcwd()
     save_dir=os.path.join(current_directory,'Logs')
     output_path=os.path.join("data", "predictions")
@@ -45,33 +96,9 @@ def main():
     
     if not os.path.exists(save_dir):
             os.makedirs(save_dir)
-    for file in os.listdir(analysis_data):
-        file_path=os.path.join(analysis_data,file)
-        image=cv2.imread(file_path)
-        results = yolov8_detector.predict(file_path,rect=True,save=True,save_dir=save_dir,conf=0.1)
-        without_faba=image.copy()
-        for result in results:
-            for x,y,w,h in result.boxes.xywh:
-                x,y,w,h = int(x), int(y), int(w), int(h)
-                cv2.rectangle(without_faba,  (x - w//2, y - h//2),(x+w//2, y+w//2), 255, -1)
-                cv2.rectangle(image,  (x - w//2, y - h//2),(x+w//2, y+w//2), 0, -3)
-        hsv_image = cv2.cvtColor(without_faba, cv2.COLOR_BGR2HSV)
-        lower_green = np.array([35, 50, 50])  # Lower bound for green in HSV
-        upper_green = np.array([85, 255, 255])  # Upper bound for green in HSV
-        mask = cv2.inRange(hsv_image, lower_green, upper_green)
-        contours, _ = cv2.findContours(mask, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-        for contour in contours:
-                
-               
-                x, y, w, h = cv2.boundingRect(contour)
-                area=cv2.contourArea(contour)
-                    #cv2.putText(image, hsv_text, (x, y - 30), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 255, 0), 2)
-                if area>threshold_area:
-                     pass
-                    #cv2.circle(image, (x, y), 20, (255, 0, 0), 2)
-        print(os.path.join(output_path,str(file)+'.jpg'))
-        cv2.imwrite(os.path.join(output_path,str(file)+'.jpg'),image)
-        
+    get_predictions(analysis_data,yolov8_detector,threshold_area,output_path,save_dir)
+  
+    
 
 if __name__ == "__main__":
     main()

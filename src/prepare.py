@@ -10,7 +10,32 @@ import shutil
 
 
 
-def extract_small_images(input_image_path, output_folder_path, window_size, step):
+def extract_small_images(input_image_path: str,
+                          output_folder_path: str, 
+                          window_size: tuple):
+    """
+    Extract small images (windows) from a larger input image.
+
+    Parameters:
+    - input_image_path (str): Path to the input image.
+    - output_folder_path (str): Path to the folder where the extracted images will be saved.
+    - window_size (tuple): Size of the extraction window in the format (width, height).
+   
+
+    Returns:
+    - None
+
+    This function reads the input image specified by 'input_image_path' and extracts small
+    images (windows) with the specified 'window_size' . The extracted images
+    are saved in the 'output_folder_path' with filenames indicating their position in the
+    original image.
+
+    Example:
+    >>> input_image_path = 'path/to/input/image.jpg'
+    >>> output_folder_path = 'path/to/output/folder'
+    >>> window_size = (100, 100)
+    >>> extract_small_images(input_image_path, output_folder_path, window_size)
+    """
     input_image = cv2.imread(input_image_path)
     height, width, _ = input_image.shape
     print(height,width)
@@ -44,7 +69,7 @@ def main():
 
     # Test data set split ratio
     split = params["split"]
-    step= params["step"]
+ 
     window_size=(split,split)
 
     
@@ -59,7 +84,7 @@ def main():
     else:
         print(f"The directory '{output_path}' does not exist.")
         os.makedirs(output_path, exist_ok=True)
-    extract_small_images(input_image_path, output_path, window_size, step)
+    extract_small_images(input_image_path, output_path, window_size)
 
 
 if __name__ == "__main__":

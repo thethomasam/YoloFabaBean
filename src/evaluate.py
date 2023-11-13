@@ -17,7 +17,8 @@ from skimage.segmentation import slic, mark_boundaries
 
 
 
-def segment_weed(input_predictions,output_path):
+def segment_weed(input_predictions:str
+                 ,output_path:str):
     '''
      Parameters:
     - input_predictions (str): Path to the directory containing input images.
@@ -58,17 +59,18 @@ def segment_weed(input_predictions,output_path):
             green_mask = cv2.inRange(hsv_image, lower_green, upper_green)
             # Apply the mask to the original image to extract the green regions
             green_regions = cv2.bitwise_and(image, image, mask=green_mask)
-            green_mask = (green_regions[:, :, 1] > 0)
+       
             contours, _ = cv2.findContours(green_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) 
             # Calculate the total area of green color
             total_area = 0
             for contour in contours:
                 total_area += cv2.contourArea(contour)
-            row={'file':str(file),'weed_area':(total_area/(width*height))*100}
+            root, _ = os.path.splitext(file)
+            row={'file':str(root),'weed_area':(total_area/(width*height))*100}
             weed_data.append(row)
             result_image = image.copy()
             cv2.drawContours(result_image, contours, -1, (0, 255, 0), 2)
-            cv2.imwrite(os.path.join(output_path,file),result_image)    
+            cv2.imwrite(os.path.join(output_path,root),result_image)    
     weed_data=pd.DataFrame(weed_data)
     weed_data.to_csv('./weed.csv')
 
@@ -78,8 +80,7 @@ def segment_weed(input_predictions,output_path):
 
 def main():
     params = yaml.safe_load(open("params.yaml"))["evaluate"]
-    green_threshold = params["green_threshold"]
-    n_segments = params["n_sgements"]
+    
     
     print(len(sys.argv))
 
@@ -94,7 +95,7 @@ def main():
     #added new
     input_predictions = sys.argv[1]
     print(input_predictions )
-    segment_weed(input_predictions,output_path,green_threshold,n_segments)
+    segment_weed(input_predictions,output_path)
 
     
 
