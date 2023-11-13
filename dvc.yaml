@@ -18,3 +18,10 @@ stages:
     - featurize.ngrams
     outs:
     - data/predictions
+  evaluate:
+    cmd: python src/evaluate.py data/predictions
+    deps:
+    - data/predictions
+    - src/evaluate.py
+    outs:
+    - data/eval

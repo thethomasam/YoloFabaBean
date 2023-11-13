@@ -31,8 +31,8 @@ stages:
       nfiles: 78
     - path: src/featurization.py
       hash: md5
-      md5: 2f6d0f0579a6578427ba2ed20469e73d
-      size: 2939
+      md5: 80a320d0470b5f30d300feb470301f46
+      size: 2940
     params:
       params.yaml:
         featurize.ngrams: 1
@@ -42,4 +42,22 @@ stages:
       hash: md5
       md5: 7f6fa39d359129ff1827d67f4cc96e4b.dir
       size: 18510689
+      nfiles: 78
+  evaluate:
+    cmd: python src/evaluate.py data/predictions
+    deps:
+    - path: data/predictions
+      hash: md5
+      md5: 7f6fa39d359129ff1827d67f4cc96e4b.dir
+      size: 18510689
+      nfiles: 78
+    - path: src/evaluate.py
+      hash: md5
+      md5: e8822646ac49158e760e6906a97972ef
+      size: 4718
+    outs:
+    - path: data/eval
+      hash: md5
+      md5: c46ee46794294706720d2a868e9d8fde.dir
+      size: 19768236
       nfiles: 78

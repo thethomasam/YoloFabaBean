@@ -3,109 +3,100 @@ import math
 import os
 import pickle
 import sys
+import yaml
 
 import pandas as pd
 from sklearn import metrics
 from sklearn import tree
 from dvclive import Live
 from matplotlib import pyplot as plt
+import numpy as np
+import cv2
+from skimage.segmentation import slic, mark_boundaries
 
 
-def evaluate(model, matrix, split, live, save_path):
-    """
-    Dump all evaluation metrics and plots for given datasets.
-
-    Args:
-        model (sklearn.ensemble.RandomForestClassifier): Trained classifier.
-        matrix (scipy.sparse.csr_matrix): Input matrix.
-        split (str): Dataset name.
-        live (dvclive.Live): Dvclive instance.
-        save_path (str): Path to save the metrics.
-    """
-    labels = matrix[:, 1].toarray().astype(int)
-    x = matrix[:, 2:]
-
-    predictions_by_class = model.predict_proba(x)
-    predictions = predictions_by_class[:, 1]
-
-    # Use dvclive to log a few simple metrics...
-    avg_prec = metrics.average_precision_score(labels, predictions)
-    roc_auc = metrics.roc_auc_score(labels, predictions)
-    if not live.summary:
-        live.summary = {"avg_prec": {}, "roc_auc": {}}
-    live.summary["avg_prec"][split] = avg_prec
-    live.summary["roc_auc"][split] = roc_auc
-
-    # ... and plots...
-    # ... like an roc plot...
-    live.log_sklearn_plot("roc", labels, predictions, name=f"roc/{split}")
-    # ... and precision recall plot...
-    # ... which passes `drop_intermediate=True` to the sklearn method...
-    live.log_sklearn_plot(
-        "precision_recall",
-        labels,
-        predictions,
-        name=f"prc/{split}",
-        drop_intermediate=True,
-    )
-    # ... and confusion matrix plot
-    live.log_sklearn_plot(
-        "confusion_matrix",
-        labels.squeeze(),
-        predictions_by_class.argmax(-1),
-        name=f"cm/{split}",
-    )
 
 
-def save_importance_plot(live, model, feature_names):
-    """
-    Save feature importance plot.
+def segment_weed(input_predictions,output_path):
+    '''
+     Parameters:
+    - input_predictions (str): Path to the directory containing input images.
+    - output_path (str): Path to the directory where segmented images will be saved.
 
-    Args:
-        live (dvclive.Live): DVCLive instance.
-        model (sklearn.ensemble.RandomForestClassifier): Trained classifier.
-        feature_names (list): List of feature names.
-    """
-    fig, axes = plt.subplots(dpi=100)
-    fig.subplots_adjust(bottom=0.2, top=0.95)
-    axes.set_ylabel("Mean decrease in impurity")
+    Returns:
+    - None
 
-    importances = model.feature_importances_
-    forest_importances = pd.Series(importances, index=feature_names).nlargest(n=30)
-    forest_importances.plot.bar(ax=axes)
+    This function reads images from the 'input_predictions' directory, segments the weed areas
+    based on the green color, calculates the percentage of weed area in each image, and saves
+    the segmented images in the 'output_path' directory. It also creates a CSV file 'weed.csv'
+    containing information about each segmented image, including the file name and the percentage
+    of weed area.
 
-    live.log_image("importance.png", fig)
+    Example:
+    >>> input_predictions = 'path/to/input/images'
+    >>> output_path = 'path/to/output/segmented/images'
+    >>> segment_weed(input_predictions, output_path)
+    
+
+    Need To Add: 
+     -  Fine Tune Green Color Upper and Lower Bounds
+    '''
+
+    params = yaml.safe_load(open("params.yaml"))["evaluate"]
+    
+    weed_data=[]
+    if os.path.isdir(input_predictions) and os.listdir(input_predictions) :
+        files = os.listdir(input_predictions)
+        for file in files:
+            image = cv2.imread(os.path.join(input_predictions,file))
+            width,height,_=image.shape
+            hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
+
+            # Define the lower and upper bounds for the green color and its shades in HSV
+            lower_green = np.array(params['lower_green'])  # Lower bound for green
+            upper_green = np.array(params['upper_green'])  # Upper bound for green
+            green_mask = cv2.inRange(hsv_image, lower_green, upper_green)
+            # Apply the mask to the original image to extract the green regions
+            green_regions = cv2.bitwise_and(image, image, mask=green_mask)
+            green_mask = (green_regions[:, :, 1] > 0)
+            contours, _ = cv2.findContours(green_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) 
+            # Calculate the total area of green color
+            total_area = 0
+            for contour in contours:
+                total_area += cv2.contourArea(contour)
+            row={'file':str(file),'weed_area':(total_area/(width*height))*100}
+            weed_data.append(row)
+            result_image = image.copy()
+            cv2.drawContours(result_image, contours, -1, (0, 255, 0), 2)
+            cv2.imwrite(os.path.join(output_path,file),result_image)    
+    weed_data=pd.DataFrame(weed_data)
+    weed_data.to_csv('./weed.csv')
+
+    
+
 
 
 def main():
-    EVAL_PATH = "eval"
+    params = yaml.safe_load(open("params.yaml"))["evaluate"]
+    green_threshold = params["green_threshold"]
+    n_segments = params["n_sgements"]
+    
+    print(len(sys.argv))
 
-    if len(sys.argv) != 3:
+    if len(sys.argv) != 2:
         sys.stderr.write("Arguments error. Usage:\n")
         sys.stderr.write("\tpython evaluate.py model features\n")
         sys.exit(1)
+    output_path=os.path.join("data", "eval")
+    if  not os.path.isdir(output_path) :
+        os.makedirs(output_path, exist_ok=True)
+    
+    #added new
+    input_predictions = sys.argv[1]
+    print(input_predictions )
+    segment_weed(input_predictions,output_path,green_threshold,n_segments)
 
-    model_file = sys.argv[1]
-    train_file = os.path.join(sys.argv[2], "train.pkl")
-    test_file = os.path.join(sys.argv[2], "test.pkl")
-
-    # Load model and data.
-    with open(model_file, "rb") as fd:
-        model = pickle.load(fd)
-
-    with open(train_file, "rb") as fd:
-        train, feature_names = pickle.load(fd)
-
-    with open(test_file, "rb") as fd:
-        test, _ = pickle.load(fd)
-
-    # Evaluate train and test datasets.
-    with Live(EVAL_PATH, dvcyaml=False) as live:
-        evaluate(model, train, "train", live, save_path=EVAL_PATH)
-        evaluate(model, test, "test", live, save_path=EVAL_PATH)
-
-        # Dump feature importance plot.
-        save_importance_plot(live, model, feature_names)
+    
 
 
 if __name__ == "__main__":

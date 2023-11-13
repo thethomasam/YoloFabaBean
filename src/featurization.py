@@ -13,6 +13,7 @@ from ultralytics.utils.plotting import Annotator
 
 
 
+
 def main():
     params = yaml.safe_load(open("params.yaml"))["featurize"]
     threshold_area = params["threshold_area"]

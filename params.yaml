@@ -11,4 +11,9 @@ train:
   seed: 20170428
   n_est: 50
   min_split: 0.01
+evaluate:
+  green_threshold: 20 
+  n_sgements: 1000
+  lower_green: [35, 50, 50]
+  upper_green: [85, 255, 255]
 
