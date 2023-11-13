@@ -14,7 +14,9 @@ import numpy as np
 import cv2
 from skimage.segmentation import slic, mark_boundaries
 
-def reconstruct_image(window_folder_path, output_path, window_size):
+def reconstruct_image(window_folder_path:str, 
+                      output_path:str,
+                        window_size:tuple):
     """
     Reconstruct the original image from small window images.
 
