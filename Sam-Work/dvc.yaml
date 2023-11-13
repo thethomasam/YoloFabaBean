@@ -1,0 +1,27 @@
+stages:
+  prepare:
+    cmd: python src/prepare.py PlantDetection
+    deps:
+    - ./PlantDetection
+    - src/prepare.py
+    params:
+    - prepare.split
+    outs:
+    - data/prepared
+  featurize:
+    cmd: python src/featurization.py data/prepared BestModel/best.pt
+    deps:
+    - data/prepared
+    - src/featurization.py
+    params:
+    - featurize.threshold_area
+    - featurize.ngrams
+    outs:
+    - data/predictions
+  evaluate:
+    cmd: python src/evaluate.py data/predictions
+    deps:
+    - data/predictions
+    - src/evaluate.py
+    outs:
+    - data/eval
