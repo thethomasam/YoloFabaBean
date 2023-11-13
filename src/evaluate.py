@@ -14,11 +14,40 @@ import numpy as np
 import cv2
 from skimage.segmentation import slic, mark_boundaries
 
+def reconstruct_image(window_folder_path, output_path, window_size):
+    # Get the size of the original image
+    original_width, original_height = (2380,17059 ) # Replace with the actual size of the original image
 
+    # Create an empty image of the original size
+    reconstructed_image = np.zeros((original_height, original_width, 3), dtype=np.uint8)
+
+    # Iterate through the small images and paste them into the empty image
+    for filename in os.listdir(window_folder_path):
+        if filename.endswith(".jpg") and filename.startswith("window_"):
+            # Extract x and y coordinates from the filename
+            root, _ = os.path.splitext(filename)
+        
+            x, y = map(int, root.split('_')[1:3])
+
+            # Read the small image
+            window = cv2.imread(os.path.join(window_folder_path, filename))
+
+            # Paste the small image into the corresponding position in the empty image
+            reconstructed_image[y:y + window_size[1], x:x + window_size[0]] = window
+
+    # Save the reconstructed image
+    output_path+='/aggregated.jpg'
+    print(output_path)
+    cv2.imwrite(output_path, reconstructed_image)
 
 
 def segment_weed(input_predictions:str
-                 ,output_path:str):
+                 ,output_path:str
+            ):
+    params = yaml.safe_load(open("params.yaml"))["evaluate"]
+    lower_green=params['lower_green']
+    upper_green=params['upper_green']
+    
     '''
      Parameters:
     - input_predictions (str): Path to the directory containing input images.
@@ -43,7 +72,7 @@ def segment_weed(input_predictions:str
      -  Fine Tune Green Color Upper and Lower Bounds
     '''
 
-    params = yaml.safe_load(open("params.yaml"))["evaluate"]
+    
     
     weed_data=[]
     if os.path.isdir(input_predictions) and os.listdir(input_predictions) :
@@ -53,25 +82,29 @@ def segment_weed(input_predictions:str
             width,height,_=image.shape
             hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
 
-            # Define the lower and upper bounds for the green color and its shades in HSV
-            lower_green = np.array(params['lower_green'])  # Lower bound for green
-            upper_green = np.array(params['upper_green'])  # Upper bound for green
+# Define the lower and upper bounds for the green color and its shades in HSV
+
+            lower_green = np.array(lower_green)  # Lower bound for green
+            upper_green = np.array(upper_green)  #   # Upper bound for green
+      
+            # Create a mask to extract green regions
             green_mask = cv2.inRange(hsv_image, lower_green, upper_green)
-            # Apply the mask to the original image to extract the green regions
+
+# Apply the mask to the original image to extract the green regions
             green_regions = cv2.bitwise_and(image, image, mask=green_mask)
-       
-            contours, _ = cv2.findContours(green_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE) 
-            # Calculate the total area of green color
+
+            green_mask = (green_regions[:, :, 1] > 0)
+            contours, _ = cv2.findContours(green_mask.astype(np.uint8), cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
+
+# Calculate the total area of green color
             total_area = 0
             for contour in contours:
                 total_area += cv2.contourArea(contour)
-            root, _ = os.path.splitext(file)
-            row={'file':str(root),'weed_area':(total_area/(width*height))*100}
-            weed_data.append(row)
             result_image = image.copy()
             cv2.drawContours(result_image, contours, -1, (0, 255, 0), 2)
-            cv2.imwrite(os.path.join(output_path,root),result_image)    
+            cv2.imwrite(output_path+'/'+file,result_image)
     weed_data=pd.DataFrame(weed_data)
+    #chaged 
     weed_data.to_csv('./weed.csv')
 
     
@@ -80,7 +113,11 @@ def segment_weed(input_predictions:str
 
 def main():
     params = yaml.safe_load(open("params.yaml"))["evaluate"]
-    
+    params_prepare = yaml.safe_load(open("params.yaml"))["prepare"]
+    window_size=params_prepare['split']
+    window_size=(window_size,window_size)
+   
+
     
     print(len(sys.argv))
 
@@ -94,9 +131,9 @@ def main():
     
     #added new
     input_predictions = sys.argv[1]
-    print(input_predictions )
+    
     segment_weed(input_predictions,output_path)
-
+    reconstruct_image(output_path, output_path, window_size)
     
 
 

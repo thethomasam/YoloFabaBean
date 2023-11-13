@@ -7,7 +7,7 @@ def nothing(x):
     pass
 
 # Load image
-image = cv2.imread('/Users/samkoshythomas/Desktop/Research-Project-DS/AIML/WeedDetection/data/predictions/window_0_0.jpg.jpg')
+image = cv2.imread('/Users/samkoshythomas/Desktop/Research-Project-DS/AIML/WeedDetection/data/prepared/window_0_3840.jpg')
 
 # Create a window
 cv2.namedWindow('image')

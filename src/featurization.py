@@ -59,7 +59,7 @@ def get_predictions(
                 cv2.rectangle(image,  (x - w//2, y - h//2),(x+w//2, y+w//2), 0, -3)
 
         print(os.path.join(output_path,str(file)+'.jpg'))
-        cv2.imwrite(os.path.join(output_path,str(file)+'.jpg'),image)
+        cv2.imwrite(os.path.join(output_path,str(file)),image)
         
      
 
