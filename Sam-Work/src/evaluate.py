@@ -15,6 +15,28 @@ import cv2
 from skimage.segmentation import slic, mark_boundaries
 
 def reconstruct_image(window_folder_path, output_path, window_size):
+    """
+    Reconstruct the original image from small window images.
+
+    Parameters:
+    - window_folder_path (str): Path to the directory containing small window images.
+    - output_path (str): Path to save the reconstructed image.
+    - window_size (tuple): Size of the small windows in pixels (width, height).
+
+    Returns:
+    - None
+
+    This function reconstructs the original image from small window images. It assumes that the
+    small window images are named in the format 'window_x_y.jpg', where 'x' and 'y' are the
+    coordinates of the top-left corner of each window. The reconstructed image is saved at the
+    specified 'output_path' as 'aggregated.jpg'.
+
+    Example:
+    >>> window_folder_path = 'path/to/small/windows'
+    >>> output_path = 'path/to/output/reconstructed_image'
+    >>> window_size = (100, 100)
+    >>> reconstruct_image(window_folder_path, output_path, window_size)
+    """
     # Get the size of the original image
     original_width, original_height = (2380,17059 ) # Replace with the actual size of the original image
 
