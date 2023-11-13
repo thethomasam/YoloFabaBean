@@ -14,6 +14,7 @@ def extract_small_images(input_image_path: str,
                           output_folder_path: str, 
                           window_size: tuple):
     """
+
     Extract small images (windows) from a larger input image.
 
     Parameters:
@@ -38,9 +39,8 @@ def extract_small_images(input_image_path: str,
     """
     input_image = cv2.imread(input_image_path)
     height, width, _ = input_image.shape
-    #print height nad width
+    #print height  width
     
-    print(height,width)
 
     for y in range(0, height - window_size[1] + 1, window_size[1]): # Adjusted step size to window_size[1]
         for x in range(0, width - window_size[0] + 1, window_size[0]): # Adjusted step size to window_size[0]

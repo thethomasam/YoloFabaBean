@@ -35,7 +35,7 @@ def reconstruct_image(window_folder_path, output_path, window_size):
             # Paste the small image into the corresponding position in the empty image
             reconstructed_image[y:y + window_size[1], x:x + window_size[0]] = window
 
-    # Save the reconstructed image
+    # Save the reconstructed 
     output_path+='/aggregated.jpg'
     print(output_path)
     cv2.imwrite(output_path, reconstructed_image)

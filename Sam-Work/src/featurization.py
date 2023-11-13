@@ -19,6 +19,7 @@ def get_predictions(
     save_dir: str
 ):
     """
+g
     Generate predictions using a YOLO model and visualize the results on images.
 
     Parameters:
