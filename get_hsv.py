@@ -1,6 +1,8 @@
 import cv2
 import numpy as np
 
+
+### Script to detect hsv ranges
 def nothing(x):
     pass
 
