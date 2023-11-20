@@ -101,7 +101,9 @@ def segment_weed(input_predictions:str
     weed_data=[]
     if os.path.isdir(input_predictions) and os.listdir(input_predictions) :
         files = os.listdir(input_predictions)
-        for file in files:
+        jpg_files = [file for file in files if file.endswith('.jpg')]
+
+        for file in jpg_files:
             image = cv2.imread(os.path.join(input_predictions,file))
             width,height,_=image.shape
             hsv_image = cv2.cvtColor(image, cv2.COLOR_BGR2HSV)
@@ -128,6 +130,7 @@ def segment_weed(input_predictions:str
             cv2.drawContours(result_image, contours, -1, (0, 255, 0), 2)
             cv2.imwrite(output_path+'/'+file,result_image)
     weed_data=pd.DataFrame(weed_data)
+    print(weed_data)
     #chaged 
     weed_data.to_csv('./weed.csv')
 
@@ -142,8 +145,7 @@ def main():
     window_size=(window_size,window_size)
    
 
-    
-    print(len(sys.argv))
+
 
     if len(sys.argv) != 2:
         sys.stderr.write("Arguments error. Usage:\n")

@@ -7,8 +7,8 @@ import cv2
 import yaml
 import shutil
 
-
-
+# change
+# change
 
 def extract_small_images(input_image_path: str,
                           output_folder_path: str, 
@@ -39,23 +39,29 @@ def extract_small_images(input_image_path: str,
     """
     input_image = cv2.imread(input_image_path)
     height, width, _ = input_image.shape
-    #print height  width
-    
-
-    for y in range(0, height - window_size[1] + 1, window_size[1]): # Adjusted step size to window_size[1]
-        for x in range(0, width - window_size[0] + 1, window_size[0]): # Adjusted step size to window_size[0]
+    print(height, width)
+    img = input_image.copy()
+    #
+    for x in range(0, width, window_size[0]):
+        # Adjusted step size to window_size[1]
+        for y in range(0, height, window_size[1]):
+         # Adjusted step size to window_size[0]
    
             # Define the coordinates for the window
             left = x
             top = y
-            right = x + window_size[0]
-            bottom = y + window_size[1]
+            right = min(x + window_size[0], width)  # Adjust for the right edge
+            bottom = min(y + window_size[1], height)
+            cv2.rectangle(img, (int(left), int(top)),
+                          (int(right), int(bottom)), (0, 255, 0), 2)
 
             # Crop the image to the window
             window = input_image[top:bottom, left:right]
 
             # Save the cropped window
             cv2.imwrite(f'{output_folder_path}/window_{x}_{y}.jpg', window)
+            print(x, y)
+    cv2.imwrite('./grid_plot.jpg', img)
 
     
 

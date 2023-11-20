@@ -46,7 +46,13 @@ g
     >>> get_predictions(analysis_data, yolo_model, threshold_area, output_path, save_dir)
     """
     # read files from directory
+    all_cordinates = pd.DataFrame(columns=['X Coordinate', 'Y Coordinate'])
     for file in os.listdir(analysis_data):
+        parts = file.replace(".jpg", "").split('_')
+        # Extract the integers
+        x_coordinate = int(parts[-2])
+        y_coordinate = int(parts[-1])
+
         file_path=os.path.join(analysis_data,file)
         image=cv2.imread(file_path)
         # get predictions for each image
@@ -55,13 +61,26 @@ g
         #iterate through bounding boxes
         for result in results:
             for x,y,w,h in result.boxes.xywh:
+
                 x,y,w,h = int(x), int(y), int(w), int(h)
+                new_data = {'X Coordinate': x+x_coordinate,
+                            'Y Coordinate': y+y_coordinate}
+
+                all_cordinates = all_cordinates.append(
+                    new_data, ignore_index=True)
                 #draw filled rectangles to hide faba beans
                 cv2.rectangle(image,  (x - w//2, y - h//2),(x+w//2, y+w//2), 0, -3)
 
         print(os.path.join(output_path,str(file)+'.jpg'))
+
         cv2.imwrite(os.path.join(output_path,str(file)),image)
-        
+    coordinate_dir = os.path.join(output_path, 'co-ordinates')
+    if not os.path.exists(coordinate_dir):
+        # If it does not exist, create it
+        os.makedirs(coordinate_dir)
+    coordinate = coordinate_dir+'/all_cordinates.csv'
+    all_cordinates.to_csv(coordinate)
+    # some chagne
      
 
 
@@ -70,7 +89,6 @@ def main():
     threshold_area = params["threshold_area"]
     
     np.set_printoptions(suppress=True)
-
     if len(sys.argv) != 3 and len(sys.argv) != 5:
         sys.stderr.write("Arguments error. Usage:\n")
         sys.stderr.write("\tpython featurization.py data-dir-path features-dir-path\n")
