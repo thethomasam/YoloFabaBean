@@ -130,7 +130,7 @@ def segment_weed(input_predictions:str
             cv2.drawContours(result_image, contours, -1, (0, 255, 0), 2)
             cv2.imwrite(output_path+'/'+file,result_image)
     weed_data=pd.DataFrame(weed_data)
-    print(weed_data)
+
     #chaged 
     weed_data.to_csv('./weed.csv')
 

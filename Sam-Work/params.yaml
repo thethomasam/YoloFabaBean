@@ -12,3 +12,7 @@ evaluate:
   lower_green: [21, 103, 70]
   upper_green: [117, 255,255]
 
+cluster:
+  num_clusters_X: 6
+  num_clusters_Y: 58
+
