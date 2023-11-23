@@ -25,3 +25,10 @@ stages:
     - src/evaluate.py
     outs:
     - data/eval
+  cluster:
+    cmd: python src/cluster.py data/predictions/co-ordinates/all_cordinates.csv
+    deps:
+    - src/cluster.py
+    - data/predictions/co-ordinates/all_cordinates.csv
+    outs:
+    - data/cluster

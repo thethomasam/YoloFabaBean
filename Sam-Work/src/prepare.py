@@ -66,7 +66,7 @@ def extract_small_images(input_image_path: str,
     
 
 def main():
-    input_image_path = "15-6-1-orig.jpg"
+    input_image_path = "/Users/samkoshythomas/Desktop/Research-Project-DS/AIML/WeedDetection/day-2.png"
     params = yaml.safe_load(open("params.yaml"))["prepare"]
     
 

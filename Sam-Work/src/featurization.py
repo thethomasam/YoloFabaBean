@@ -101,7 +101,7 @@ def main():
     current_directory = os.getcwd()
     save_dir=os.path.join(current_directory,'Logs')
     output_path=os.path.join("data", "predictions")
-    
+    #
     if os.path.isdir(output_path) and os.listdir(output_path) :
         print('No Files')
         files = os.listdir(output_path)

@@ -159,7 +159,7 @@ def main():
     input_predictions = sys.argv[1]
     
     segment_weed(input_predictions,output_path)
-    reconstruct_image(output_path, output_path, window_size)
+    # reconstruct_image(output_path, output_path, window_size)
     
 
 
