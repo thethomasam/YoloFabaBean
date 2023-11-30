@@ -5,6 +5,7 @@ import pickle
 import sys
 import yaml
 
+
 import pandas as pd
 from sklearn import metrics
 from sklearn import tree
@@ -40,7 +41,8 @@ def reconstruct_image(window_folder_path:str,
     >>> reconstruct_image(window_folder_path, output_path, window_size)
     """
     # Get the size of the original image
-    original_width, original_height = (2380,17059 ) # Replace with the actual size of the original image
+    # Replace with the actual size of the original image
+    original_width, original_height = (17059, 2380)
 
     # Create an empty image of the original size
     reconstructed_image = np.zeros((original_height, original_width, 3), dtype=np.uint8)
@@ -50,12 +52,24 @@ def reconstruct_image(window_folder_path:str,
         if filename.endswith(".jpg") and filename.startswith("window_"):
             # Extract x and y coordinates from the filename
             root, _ = os.path.splitext(filename)
+            print(root)
         
             x, y = map(int, root.split('_')[1:3])
+            x, y = int(x), int(y)
 
             # Read the small image
             window = cv2.imread(os.path.join(window_folder_path, filename))
 
+            print(window.shape)
+            # print(window_size)
+            print(x + window_size[1], y)
+            black_image = reconstructed_image[x:x + window_size[1], y:y +
+                                              window_size[1]]
+
+            print('black_image', black_image.shape)
+            print(window.shape)
+            print(
+                reconstructed_image[y:y + window_size[1], x:x + window_size[0]].shape)
             # Paste the small image into the corresponding position in the empty image
             reconstructed_image[y:y + window_size[1], x:x + window_size[0]] = window
 
@@ -65,13 +79,16 @@ def reconstruct_image(window_folder_path:str,
     cv2.imwrite(output_path, reconstructed_image)
 
 
+
+
 def segment_weed(input_predictions:str
                  ,output_path:str
             ):
     params = yaml.safe_load(open("params.yaml"))["evaluate"]
     lower_green=params['lower_green']
     upper_green=params['upper_green']
-    
+
+
     '''
      Parameters:
     - input_predictions (str): Path to the directory containing input images.
@@ -98,11 +115,11 @@ def segment_weed(input_predictions:str
 
     
     
-    weed_data=[]
+
     if os.path.isdir(input_predictions) and os.listdir(input_predictions) :
         files = os.listdir(input_predictions)
-        jpg_files = [file for file in files if file.endswith('.jpg')]
-
+        jpg_files = [f for f in files if f.endswith('.jpg')]
+        df = pd.DataFrame(columns=['x', 'y', 'Weed_Percentage%'])
         for file in jpg_files:
             image = cv2.imread(os.path.join(input_predictions,file))
             width,height,_=image.shape
@@ -128,11 +145,18 @@ def segment_weed(input_predictions:str
                 total_area += cv2.contourArea(contour)
             result_image = image.copy()
             cv2.drawContours(result_image, contours, -1, (0, 255, 0), 2)
-            cv2.imwrite(output_path+'/'+file,result_image)
-    weed_data=pd.DataFrame(weed_data)
+            root, _ = os.path.splitext(file)
 
+            x, y = map(int, root.split('_')[1:3])
+            x, y = int(x), int(y)
+            cv2.imwrite(output_path+'/'+file, result_image)
+            df = df.append(
+                {'x': x, 'y': y, 'Weed_Percentage%': total_area/(640*640)}, ignore_index=True)
+
+    weed_data = pd.DataFrame(df)
     #chaged 
     weed_data.to_csv('./weed.csv')
+
 
     
 
@@ -161,7 +185,6 @@ def main():
     segment_weed(input_predictions,output_path)
     # reconstruct_image(output_path, output_path, window_size)
     
-
 
 if __name__ == "__main__":
     main()

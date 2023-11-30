@@ -5,30 +5,30 @@ stages:
     deps:
     - path: ./PlantDetection
       hash: md5
-      md5: 6ece5cbdc3d976d6c46228c2d82cbea7.dir
+      md5: 7644e78ea44d68aceb7569fb02e98c7c.dir
       size: 106917793
       nfiles: 730
     - path: src/prepare.py
       hash: md5
-      md5: dac7d17fddc20fcf078d2b9d19d62155
-      size: 3148
+      md5: d98741f099d42dccd25edc8a056b6b34
+      size: 3233
     params:
       params.yaml:
         prepare.split: 640
     outs:
     - path: data/prepared
       hash: md5
-      md5: c728f6f717212a6e5ff7a68edb39bf8c.dir
-      size: 7714293
-      nfiles: 40
+      md5: f920051e29fd7b63375ec115d54d30fa.dir
+      size: 23659636
+      nfiles: 108
   featurize:
     cmd: python src/featurization.py data/prepared BestModel/best.pt
     deps:
     - path: data/prepared
       hash: md5
-      md5: c728f6f717212a6e5ff7a68edb39bf8c.dir
-      size: 7714293
-      nfiles: 40
+      md5: f920051e29fd7b63375ec115d54d30fa.dir
+      size: 23659636
+      nfiles: 108
     - path: src/featurization.py
       hash: md5
       md5: d9c1550d8867043e76ebba79e7cd46f8
@@ -40,41 +40,24 @@ stages:
     outs:
     - path: data/predictions
       hash: md5
-      md5: edfc401b5788830bdc81183540706606.dir
-      size: 7689252
-      nfiles: 41
+      md5: a380cfefb990d1bce1fe065bdb8708ab.dir
+      size: 23521426
+      nfiles: 109
   evaluate:
     cmd: python src/evaluate.py data/predictions
     deps:
     - path: data/predictions
       hash: md5
-      md5: edfc401b5788830bdc81183540706606.dir
-      size: 7689252
-      nfiles: 41
+      md5: a380cfefb990d1bce1fe065bdb8708ab.dir
+      size: 23521426
+      nfiles: 109
     - path: src/evaluate.py
       hash: md5
-      md5: b6552ab68141a6bbb05115c934217f32
-      size: 5798
+      md5: 00a76cbdd34fabb674dc8403d1364ccc
+      size: 6582
     outs:
     - path: data/eval
       hash: md5
-      md5: d77b7a44024b5c92ba2f6b3a1d584270.dir
-      size: 8400811
-      nfiles: 40
-  cluster:
-    cmd: python src/cluster.py data/predictions/co-ordinates/all_cordinates.csv
-    deps:
-    - path: data/predictions/co-ordinates/all_cordinates.csv
-      hash: md5
-      md5: 0f6be04ff92fa4fce8e26070d63a5c08
-      size: 2260
-    - path: src/cluster.py
-      hash: md5
-      md5: 5c6f18079ec6b2601bd063a955616221
-      size: 5314
-    outs:
-    - path: data/cluster
-      hash: md5
-      md5: 81ee04a93f8c662ff71f3e46843ddb98.dir
-      size: 15660972
-      nfiles: 2
+      md5: 0106b3fe1dd25db8b7b1d1da04ed604a.dir
+      size: 25933240
+      nfiles: 108

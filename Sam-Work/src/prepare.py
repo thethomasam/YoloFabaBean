@@ -66,7 +66,9 @@ def extract_small_images(input_image_path: str,
     
 
 def main():
-    input_image_path = "/Users/samkoshythomas/Desktop/Research-Project-DS/AIML/WeedDetection/day-2.png"
+    input_image_path = "/Users/samkoshythomas/Desktop/UoA-Masters/Research-Project-DS/AIML/WeedDetection/Sam-Work/15-6-1-orig.jpg"
+    im = cv2.imread(input_image_path)
+    print(im.shape)
     params = yaml.safe_load(open("params.yaml"))["prepare"]
     
 

@@ -11,38 +11,24 @@ from matplotlib import pyplot as plt
 import numpy as np
 import cv2
 
+from pathlib import Path
 
-import supervision as sv
-from autodistill_seggpt import SegGPT, FewShotOntology
+
+from seggpt_inference import run_inference
+
+
+def run_seg_inference(input_predictions):
+    if os.path.isdir(input_predictions) and os.listdir(input_predictions):
+        files = os.listdir(input_predictions)
+        jpg_files = [f for f in files if f.endswith('.jpg')]
+        for file in jpg_files:
+            run_inference('cpu', 'data/stuble', input_image=os.path.join(input_predictions, file),
+                          input_video=None, prompt_image='/Users/samkoshythomas/Desktop/Projects/SEG-GPT/Painter/SegGPT/stubble-train/train/images/window_1280_11520_jpg.rf.7f11354471a9177766d29040a5c20ba1.jpg', prompt_target='/Users/samkoshythomas/Desktop/Projects/SEG-GPT/Painter/SegGPT/window_1280_11520_jpg.rf.7f11354471a9177766d29040a5c20ba1.jpg')
+            print(file)
+
 
 def main():
-    if len(sys.argv) != 2:
-        sys.stderr.write("Arguments error. Usage:\n")
-        sys.stderr.write("\tpython evaluate.py model features\n")
-        sys.exit(1)
-    input_predictions = sys.argv[1]
- 
-        
-    
-    supervision_dataset = sv.DetectionDataset.from_yolo(
-        images_directory_path="/Users/samkoshythomas/Desktop/Research-Project-DS/AIML/WeedDetection/Sam-Work/stubble-3/train/images",
-        annotations_directory_path="/Users/samkoshythomas/Desktop/Research-Project-DS/AIML/WeedDetection/Sam-Work/stubble-3/train/labels",
-        data_yaml_path="/Users/samkoshythomas/Desktop/Research-Project-DS/AIML/WeedDetection/Sam-Work/stubble-3/data.yaml",
-        force_masks=True
-    )
-
-    base_model = SegGPT(
-        ontology=FewShotOntology(supervision_dataset)
-    )
-    
-    base_model.label(input_predictions, extension=".jpg")
-        # print(os.path.join(input_predictions,file))
-    #   
-
-# from roboflow import Roboflow
-# rf = Roboflow(api_key="WRAR8pzooH3PWR6Kt9ue")
-# project = rf.workspace("sam-thomas-m5kgt").project("stubble")
-# dataset = project.version(3).download("yolov8")
+    run_seg_inference('./data/predictions')
 
 if __name__ == "__main__":
     main()

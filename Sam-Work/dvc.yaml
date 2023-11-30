@@ -25,10 +25,11 @@ stages:
     - src/evaluate.py
     outs:
     - data/eval
-  cluster:
-    cmd: python src/cluster.py data/predictions/co-ordinates/all_cordinates.csv
+  stubble:
+    cmd: python src/stubble-seg.py data/eval
     deps:
-    - src/cluster.py
-    - data/predictions/co-ordinates/all_cordinates.csv
+    - stubble-train
+    - src/stubble-seg.py
+    - data/eval
     outs:
-    - data/cluster
+    - data/stubble

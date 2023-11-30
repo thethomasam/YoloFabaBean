@@ -106,7 +106,7 @@ def main():
         sys.exit(1)
 
     img = cv2.imread(
-        '/Users/samkoshythomas/Desktop/Research-Project-DS/AIML/WeedDetection/day-2.png')
+        '/Users/samkoshythomas/Desktop/Research-Project-DS/AIML/WeedDetection/day-1.png')
     input_predictions = sys.argv[1]
     img_Y = img.copy()
     df = pd.read_csv(input_predictions)
@@ -130,6 +130,8 @@ def main():
     img_Y, all_r_squared_Y = get_straightness(
         df, img_Y, num_clusters_Y, kmeans_y, 'column')
 
+    cv2.imwrite(os.path.join(output_path, 'plotX.jpg'), img)
+    cv2.imwrite(os.path.join(output_path, 'plotY.jpg'), img_Y)
     df_Y = {}
     df_Y['density'] = density_Y
     df_Y['rsquare'] = all_r_squared_Y
@@ -141,10 +143,9 @@ def main():
     df_Y = pd.DataFrame(df_Y)
     df_X = pd.DataFrame(df_X)
 
-    df_Y.to_csv('./Y-plot.csv')
-    df_X.to_csv('./X-plot.csv')
-    cv2.imwrite(os.path.join(output_path, 'plotX.jpg'), img)
-    cv2.imwrite(os.path.join(output_path, 'plotY.jpg'), img_Y)
+    df_Y.to_csv('./Y-plot-day3.csv')
+    df_X.to_csv('./X-plot-day3.csv')
+
     # centroids = kmeans.cluster_centers_
 # labels = kmeans.labels_
 
